@@ -1,0 +1,10 @@
+# Core dependencies
+requests>=2.31.0
+chromadb>=1.4.1
+PyMuPDF>=1.26.7
+
+# Document processing (optional, for non-PDF/TXT formats)
+docling>=1.0.0
+
+# Google ADK for agent functionality
+google-adk[extensions]>=1.23.0

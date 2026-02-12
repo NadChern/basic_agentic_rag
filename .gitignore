@@ -1,0 +1,8 @@
+__pycache__
+.adk
+.venv
+chromadb_storage
+documents/*.pdf
+.env
+sales.db
+.DS_Store

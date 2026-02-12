@@ -1,0 +1,16 @@
+[project]
+name = "agenticrag"
+version = "0.1.0"
+description = "A simple, privacy-focused document question-answering system"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "chromadb>=1.4.1",
+    "PyMuPDF>=1.26.7",
+    "docling>=1.0.0",
+    "google-adk[extensions]>=1.23.0",
+]
+
+[dependency-groups]
+dev = []
