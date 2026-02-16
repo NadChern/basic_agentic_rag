@@ -15,12 +15,13 @@ An AI-powered sales analyst agent that combines document search with SQL databas
 
 Before installing, make sure you have:
 
-1. **Python 3.8+** installed
+1. **Python 3.10+** installed
 2. **Ollama** installed and running ([Download here](https://ollama.ai))
 3. Required Ollama models:
+
    ```bash
    ollama pull granite-embedding:30m
-   ollama pull gemma3:4b
+
    ```
 
 ## Installation
@@ -33,7 +34,7 @@ Before installing, make sure you have:
    curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-3. Create virtual environment and install dependencies:
+3. Create virtual environment and install dependencies (recommended):
 
    ```bash
    uv sync
@@ -41,16 +42,26 @@ Before installing, make sure you have:
 
 4. Set up environment variables:
 
-   Create a `.env` file in the `my_agent/` directory with:
+   Create a `.env` file in the project root with:
+
    ```bash
    OPENROUTER_API_KEY=your_openrouter_api_key_here
    ```
 
+This is required only when using cloud-based LLMs via OpenRouter.
+Local Ollama-based workflows do not require an API key.
+
 ## Usage
 
-### Running the Agent (Recommended)
+### Running the Agent
 
-Start the agent web interface:
+1 Option: Start the agent from CLI:
+
+```bash
+uv run main.py
+```
+
+2 Option. Start the agent web interface:
 
 ```bash
 adk web --port 8000
@@ -89,24 +100,31 @@ uv run python query.py "What is the main topic of the document?"
 
 ## Agent Tools
 
-The sales analyst agent has access to three specialized tools:
+The sales analyst agent has access to four specialized tools:
 
 ### `search_documents`
+
 RAG-based search through indexed forecast and planning documents. Use this to find information about projections, plans, and forecasts.
 
 ### `query_sales`
+
 Execute SQL queries against the sales database. The database contains transaction data with columns: id, date, year, month, category, amount.
 
 ### `calculate_metrics`
+
 Perform variance analysis, year-over-year comparisons, and growth rate calculations on sales data.
+
+### `export_to_pdf`
+
+Export report content to a PDF file. Use this when the user explicitly requests a PDF, report export, or asks to "generate a report". Supports markdown tables and saves files to the `exports/` directory.
 
 ## Configuration
 
-You can modify these settings in `index.py` and `query.py`:
+You can modify these settings in `query.py` and `agent.py`:
 
 - `OLLAMA_API_BASE`: Ollama API endpoint (default: `http://localhost:11434`)
 - `EMBEDDING_MODEL`: Model for embeddings (default: `granite-embedding:30m`)
-- `GENERATION_MODEL`: Model for chat/generation (default: `nemotron-3-nano-30b-a3b:free`)
+- `GENERATION_MODEL`: Model for agent LLM via OpenRouter (default: `openrouter/nvidia/nemotron-3-nano-30b-a3b:free`)
 - `CHROMA_DB_PATH`: Database storage location (default: `./chromadb_storage`)
 
 ## Project Structure
@@ -116,6 +134,7 @@ NaiveRag/
 ├── main.py              # Main interactive interface
 ├── index.py             # Document indexing pipeline
 ├── query.py             # Question-answering pipeline
+├── pyproject.toml       # Python dependencies (uv)
 ├── db/
 │   ├── init_db.py       # Database initialization script
 │   └── sales.db         # SQLite sales database
@@ -126,9 +145,11 @@ NaiveRag/
 │       ├── __init__.py
 │       ├── search_documents.py
 │       ├── query_sales.py
-│       └── calculate_metrics.py
+│       ├── calculate_metrics.py
+│       └── export_to_pdf.py
 ├── documents/           # Forecast documents to index
-├── requirements.txt     # Python dependencies
+├── exports/             # Generated PDF reports
+├── fonts/               # Fonts for PDF generation
 └── chromadb_storage/    # Vector database (created automatically)
 ```
 
@@ -137,6 +158,7 @@ NaiveRag/
 **"Model not found" error:**
 
 - Make sure Ollama is running: `ollama serve`
+- Verify models are installed: `ollama list`
 - Pull the required models (see Prerequisites)
 
 **"No relevant information found":**
@@ -146,12 +168,11 @@ NaiveRag/
 
 **Import errors:**
 
-- Make sure your virtual environment is activated
 - Install dependencies: `uv sync`
 
 **Agent not starting:**
 
-- Verify `OPENROUTER_API_KEY` is set in `my_agent/.env`
+- Verify `OPENROUTER_API_KEY` is set in `.env` (project root)
 - Check that Google ADK is installed: `uv pip install google-adk`
 
 ## Privacy & Security

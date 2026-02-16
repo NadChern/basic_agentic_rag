@@ -9,26 +9,20 @@ warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
 
 def print_header():
     """Print welcome banner"""
-    print("\n" + "="*60)
-    print("  NAIVE RAG - Local Document Q&A System")
-    print("="*60)
-    print("\nWhat this program does:")
-    print("  • Index your documents locally (PDF, DOCX, TXT)")
-    print("  • Ask questions about your documents")
-    print("  • Uses Ollama (local AI) - no data leaves your computer")
-    print("  • Stores documents in ChromaDB vector database")
-    print("="*60 + "\n")
+    print("\n" + "="*50)
+    print("  Sales Assistant")
+    print("  Your AI-powered sales knowledge base")
+    print("="*50 + "\n")
 
 def show_menu():
     """Display main menu options"""
-    print("\nWhat would you like to do?\n")
-    print("  [1] Index a document")
-    print("  [2] Chat with your documents")
+    print("  [1] Add sales document")
+    print("  [2] Ask a question")
     print("  [3] Exit\n")
 
 def index_document():
     """Handle document indexing"""
-    print("\n--- Document Indexing ---")
+    print("\n--- Add Document ---")
     file_path = input("Enter the full path to your document: ").strip()
     
     # Validate file exists
@@ -47,27 +41,26 @@ def index_document():
 
 def start_chat():
     """Handle chat interface"""
-    print("\n--- Chat Mode ---")
-    print("Ask questions about your indexed documents.")
-    print("Type 'exit' or 'quit' to return to main menu.\n")
-    
+    print("\n--- Sales Assistant ---")
+    print("Type 'exit' to return to menu.\n")
+
     try:
         from query import ask_question
-        
+
         while True:
             question = input("You: ").strip()
-            
-            if question.lower() in ['exit', 'quit', 'back']:
+
+            if question.lower() in ['exit', 'quit', 'back', '3']:
                 print("Returning to main menu...\n")
                 break
-            
+
             if not question:
                 continue
-            
+
             # Get answer
             answer = asyncio.run(ask_question(question))
             print(f"\nAssistant: {answer}\n")
-            
+
     except Exception as e:
         print(f"❌ Error during chat: {e}")
 

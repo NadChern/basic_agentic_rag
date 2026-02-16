@@ -218,6 +218,16 @@ def _get_sales_by_period(year: int, period: str = 'monthly') -> dict:
     return results
 
 
+def _get_years_with_data() -> list[int]:
+    """Get list of years that have sales data."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT year FROM sales ORDER BY year")
+    years = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return years
+
+
 def _forecast_comparison(year: int, period: str, period_number: int, forecast_values: dict) -> dict:
     """Compare actual sales vs forecast values."""
     if not forecast_values:
@@ -258,6 +268,10 @@ def _forecast_comparison(year: int, period: str, period_number: int, forecast_va
     total_variance = total_actual - total_forecast
     total_variance_pct = (total_variance / total_forecast * 100) if total_forecast else 0
 
+    # Get data availability metadata
+    available_years = _get_years_with_data()
+    has_data = year in available_years
+
     return {
         "status": "success",
         "year": year,
@@ -268,7 +282,10 @@ def _forecast_comparison(year: int, period: str, period_number: int, forecast_va
             "total_forecast": round(total_forecast, 2),
             "total_variance": round(total_variance, 2),
             "total_variance_pct": round(total_variance_pct, 2)
-        }
+        },
+        "data_available_for": [year] if has_data else [],
+        "data_missing_for": [] if has_data else [year],
+        "note": f"No data found for: [{year}]" if not has_data else None
     }
 
 
@@ -304,6 +321,11 @@ def _yoy_comparison(year: int, period: str, period_number: int, compare_year: in
     total_change = total_current - total_previous
     total_change_pct = (total_change / total_previous * 100) if total_previous else 0
 
+    # Get data availability metadata
+    available_years = _get_years_with_data()
+    years_requested = [year, compare_year]
+    missing = [y for y in years_requested if y not in available_years]
+
     return {
         "status": "success",
         "current_year": year,
@@ -315,7 +337,10 @@ def _yoy_comparison(year: int, period: str, period_number: int, compare_year: in
             f"total_{compare_year}": round(total_previous, 2),
             "total_change": round(total_change, 2),
             "total_change_pct": round(total_change_pct, 2)
-        }
+        },
+        "data_available_for": [y for y in years_requested if y in available_years],
+        "data_missing_for": missing,
+        "note": f"No data found for: {missing}" if missing else None
     }
 
 
@@ -348,6 +373,10 @@ def _growth(year: int, period: str, period_number: int) -> dict:
     growth_rates = [r["growth_pct"] for r in results if r["growth_pct"] is not None]
     avg_growth = sum(growth_rates) / len(growth_rates) if growth_rates else None
 
+    # Get data availability metadata
+    available_years = _get_years_with_data()
+    has_data = year in available_years
+
     return {
         "status": "success",
         "year": year,
@@ -355,7 +384,10 @@ def _growth(year: int, period: str, period_number: int) -> dict:
         "results": results,
         "summary": {
             "average_growth_pct": round(avg_growth, 2) if avg_growth is not None else None
-        }
+        },
+        "data_available_for": [year] if has_data else [],
+        "data_missing_for": [] if has_data else [year],
+        "note": f"No data found for: [{year}]" if not has_data else None
     }
 
 
@@ -402,6 +434,10 @@ def _category_breakdown(year: int, period: str, period_number: int) -> dict:
             "percentage_of_total": round(pct, 2)
         })
 
+    # Get data availability metadata
+    available_years = _get_years_with_data()
+    has_data = year in available_years and len(rows) > 0
+
     return {
         "status": "success",
         "year": year,
@@ -410,5 +446,8 @@ def _category_breakdown(year: int, period: str, period_number: int) -> dict:
         "summary": {
             "total": round(total, 2),
             "category_count": len(results)
-        }
+        },
+        "data_available_for": [year] if has_data else [],
+        "data_missing_for": [] if has_data else [year],
+        "note": f"No data found for: [{year}]" if not has_data else None
     }

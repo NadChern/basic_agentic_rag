@@ -1,4 +1,5 @@
 import asyncio
+
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
@@ -30,10 +31,13 @@ async def generate_answer(question: str) -> str:
                 continue
             if hasattr(event, 'content') and event.content:
                 for part in event.content.parts:
+                    # Skip thinking/reasoning parts (marked with thought=True)
+                    if getattr(part, 'thought', False):
+                        continue
                     if hasattr(part, 'text') and part.text:
                         final_response += part.text
 
-        return final_response if final_response else "No response generated."
+        return final_response.strip() if final_response else "No response generated."
     except Exception as e:
         return f"Error generating answer: {e}"
 

@@ -6,3 +6,4 @@ documents/*.pdf
 .env
 sales.db
 .DS_Store
+exports/*.pdf

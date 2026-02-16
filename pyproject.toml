@@ -10,6 +10,7 @@ dependencies = [
     "PyMuPDF>=1.26.7",
     "docling>=1.0.0",
     "google-adk[extensions]>=1.23.0",
+    "fpdf2>=2.8.5",
 ]
 
 [dependency-groups]
